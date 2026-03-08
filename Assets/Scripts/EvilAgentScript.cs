@@ -42,6 +42,21 @@ public class EvilAgentScript : Agent
         episodeStartTime = Time.time;
         lastRewardTime = Time.time;
         
+        // Ensure gameManager is ready FIRST
+        if (gameManager == null)
+        {
+            GameObject gmObj = GameObject.Find("GameManager");
+            if (gmObj != null)
+            {
+                gameManager = gmObj.GetComponent<GameManager>();
+                Debug.Log($"EvilAgentScript.OnEpisodeBegin id={robotScript.robotId}: Found gameManager");
+            }
+            else
+            {
+                Debug.LogWarning($"EvilAgentScript.OnEpisodeBegin id={robotScript.robotId}: GameManager not found!");
+            }
+        }
+        
         // Reset position to random location within screen bounds
         Camera mainCamera = Camera.main;
         Vector3 spawnPos = new Vector3(Random.Range(-10f, 10f), Random.Range(-10f, 10f), 0);
@@ -69,75 +84,113 @@ public class EvilAgentScript : Agent
         
         // Reinitialize alignments to all "Prey"
         robotScript.alignments.Clear();
-        foreach (int botId in gameManager.robots.Keys)
+        if (gameManager != null && gameManager.robots != null)
         {
-            if (botId != robotScript.robotId)
-                robotScript.alignments[botId] = Constants.ALIGNMENT_PREY;
+            foreach (int botId in gameManager.robots.Keys)
+            {
+                if (botId != robotScript.robotId)
+                    robotScript.alignments[botId] = Constants.ALIGNMENT_PREY;
+            }
         }
         
         // ensure the agent begins decisions immediately
-        RequestDecision();
+        if (robotScript != null && gameManager != null) RequestDecision();
     }
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        vectorSensor = sensor;
+        // Debug.Log($"CollectObservations: robotScript={robotScript != null}, gm={gameManager != null}, robots={gameManager?.robots != null}");
+        // ALWAYS add exactly 12 observations, no matter what
+        int obsCount = 0;
         
-        // Update nearest bots
-        robotScript.UpdateNearestBots();
-        
-        Debug.Log($"CollectObs killer {robotScript.robotId}: size={sensor.ObservationSize()} closest={(robotScript.closestBot!=null?robotScript.closestBot.robotId:-1)}, second={(robotScript.secondClosestBot!=null?robotScript.secondClosestBot.robotId:-1)} count={(gameManager!=null?gameManager.robots.Count:-1)}");
-        
-        // 1. Nearest bot info: [bot_id, last_action_encoded, exists]
-        if (robotScript.closestBot != null)
+        try
         {
-            sensor.AddObservation(robotScript.closestBot.robotId);
-            sensor.AddObservation(EncodeLastAction(robotScript.closestBot.lastAction));
-            sensor.AddObservation(1f); // exists
+            // Ensure gameManager is set
+            if (gameManager == null)
+            {
+                GameObject gmObj = GameObject.Find("GameManager");
+                if (gmObj != null)
+                    gameManager = gmObj.GetComponent<GameManager>();
+            }
+            
+            if (gameManager != null && gameManager.robots != null)
+            {
+                // Update nearest bots
+                robotScript.UpdateNearestBots();
+                
+                // 1. Nearest bot info: [bot_id, last_action_encoded, exists]
+                if (robotScript.closestBot != null)
+                {
+                    sensor.AddObservation(robotScript.closestBot.robotId);
+                    sensor.AddObservation(EncodeLastAction(robotScript.closestBot.lastAction));
+                    sensor.AddObservation(1f); // exists
+                    obsCount += 3;
+                }
+                else
+                {
+                    sensor.AddObservation(0f);
+                    sensor.AddObservation(0f);
+                    sensor.AddObservation(0f);
+                    obsCount += 3;
+                }
+                
+                // 2. Second nearest bot info
+                if (robotScript.secondClosestBot != null)
+                {
+                    sensor.AddObservation(robotScript.secondClosestBot.robotId);
+                    sensor.AddObservation(EncodeLastAction(robotScript.secondClosestBot.lastAction));
+                    sensor.AddObservation(1f); // exists
+                    obsCount += 3;
+                }
+                else
+                {
+                    sensor.AddObservation(0f);
+                    sensor.AddObservation(0f);
+                    sensor.AddObservation(0f);
+                    obsCount += 3;
+                }
+                
+                // 3. Time left
+                float timeLeft = gameManager.matchTime - gameManager.currentTime;
+                sensor.AddObservation(timeLeft / gameManager.matchTime);
+                obsCount++;
+                
+                // 4. Number of bots dead
+                int deadCount = 0;
+                foreach (RobotScript bot in gameManager.robots.Values)
+                {
+                    if (!bot.isAlive) deadCount++;
+                }
+                sensor.AddObservation(deadCount / (float)gameManager.robots.Count);
+                obsCount++;
+                
+                // 5. Alignment counts for self perception
+                Dictionary<string, int> alignmentCounts = robotScript.GetAlignmentCounts();
+                sensor.AddObservation(alignmentCounts[Constants.ALIGNMENT_NEUTRAL] / (float)gameManager.robots.Count);
+                sensor.AddObservation(alignmentCounts[Constants.ALIGNMENT_FRIENDLY] / (float)gameManager.robots.Count);
+                sensor.AddObservation(alignmentCounts[Constants.ALIGNMENT_PREY] / (float)gameManager.robots.Count);
+                sensor.AddObservation(alignmentCounts[Constants.ALIGNMENT_PREDATOR] / (float)gameManager.robots.Count);
+                obsCount += 4;
+            }
         }
-        else
+        catch (System.Exception ex)
         {
-            sensor.AddObservation(0f);
-            sensor.AddObservation(0f);
-            sensor.AddObservation(0f);
+            Debug.LogError($"EvilAgentScript.CollectObservations exception: {ex.Message}");
+            Debug.Log($"So then the obs count is {obsCount}");
         }
         
-        // 2. Second nearest bot info
-        if (robotScript.secondClosestBot != null)
-        {
-            sensor.AddObservation(robotScript.secondClosestBot.robotId);
-            sensor.AddObservation(EncodeLastAction(robotScript.secondClosestBot.lastAction));
-            sensor.AddObservation(1f); // exists
-        }
-        else
+        // Guarantee 12 observations, pad with zeros if needed
+        while (obsCount < Constants.KILLER_OBS_SIZE)
         {
             sensor.AddObservation(0f);
-            sensor.AddObservation(0f);
-            sensor.AddObservation(0f);
+            obsCount++;
         }
-        
-        // 3. Time left
-        float timeLeft = gameManager.matchTime - gameManager.currentTime;
-        sensor.AddObservation(timeLeft / gameManager.matchTime); // Normalized 0-1
-        
-        // 4. Number of bots dead
-        int deadCount = 0;
-        foreach (RobotScript bot in gameManager.robots.Values)
-        {
-            if (!bot.isAlive) deadCount++;
-        }
-        sensor.AddObservation(deadCount / (float)gameManager.robots.Count); // Normalized
-        
-        // 5. Alignment counts for self perception
-        Dictionary<string, int> alignmentCounts = robotScript.GetAlignmentCounts();
-        sensor.AddObservation(alignmentCounts[Constants.ALIGNMENT_NEUTRAL] / (float)gameManager.robots.Count);
-        sensor.AddObservation(alignmentCounts[Constants.ALIGNMENT_FRIENDLY] / (float)gameManager.robots.Count);
-        sensor.AddObservation(alignmentCounts[Constants.ALIGNMENT_PREY] / (float)gameManager.robots.Count);
-        sensor.AddObservation(alignmentCounts[Constants.ALIGNMENT_PREDATOR] / (float)gameManager.robots.Count);
     }
 
     public override void OnActionReceived(ActionBuffers actions)
     {
+        if (gameManager != null && !gameManager.matchStarted) gameManager.matchStarted = true;
+        
         if (!robotScript.isAlive)
         {
             EndEpisode();
@@ -146,7 +199,6 @@ public class EvilAgentScript : Agent
         
         // Discrete actions: [movement, alignment1, alignment2]
         int[] discreteActions = actions.DiscreteActions.Array;
-        Debug.Log($"OnActionReceived killer {robotScript.robotId}: [{string.Join(",",discreteActions)}]");
         
         // Branch 0: Movement (0-4)
         int movementAction = discreteActions[0];
@@ -164,6 +216,9 @@ public class EvilAgentScript : Agent
         
         // Small penalty for each step to encourage efficiency
         AddReward(-0.001f);
+        
+        // Request the next decision to continue the episode
+        RequestDecision();
     }
 
     private void ExecuteMovementAction(int actionIndex)

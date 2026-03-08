@@ -48,6 +48,10 @@ public class RobotScript : MonoBehaviour
         {
             managerScript = manager.GetComponent<GameManager>();
         }
+        else if (manager == null)
+        {
+            Debug.Log("CONDUCTOR WE HAVE A PROBLEM!");
+        }
         
         // Initialize camera and screen bounds
         if (mainCamera == null)
@@ -264,8 +268,8 @@ public class RobotScript : MonoBehaviour
             }
         }
         
-        if (checkedCount > 0)
-            Debug.Log($"UpdateNearestBots id={robotId}: checked={checkedCount} skipped={skippedCount} alive, closest={(closestBot!=null?closestBot.robotId:-1)} second={(secondClosestBot!=null?secondClosestBot.robotId:-1)}");
+        // if (checkedCount > 0)
+        //     Debug.Log($"UpdateNearestBots id={robotId}: checked={checkedCount} skipped={skippedCount} alive, closest={(closestBot!=null?closestBot.robotId:-1)} second={(secondClosestBot!=null?secondClosestBot.robotId:-1)}");
     }
     
     private float MovementDotTowards(RobotScript mover, RobotScript target)

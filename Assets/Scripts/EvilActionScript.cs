@@ -7,9 +7,12 @@ public class EvilActionScript : RobotScript
     void Start()
     {
         DoStart();
+        
+        // Initialize alignments - killers see all others as "Prey"
         foreach (int botId in managerScript.robots.Keys)
         {
-            if(botId != robotId) alignments[botId] = "Prey";
+            if(botId != robotId) 
+                alignments[botId] = Constants.ALIGNMENT_PREY;
         }
     }
 
@@ -18,5 +21,4 @@ public class EvilActionScript : RobotScript
     {
         DoUpdate();
     }
-
 }

@@ -82,7 +82,7 @@ public class SceneInitializer : MonoBehaviour
         
         gameManagerObject = new GameObject("GameManager");
         GameManager gm = gameManagerObject.AddComponent<GameManager>();
-        gm.matchTime = 30;
+        gm.matchTime = 30;  // 30 seconds per match
         
         // Add MatchTimerUI for display
         gameManagerObject.AddComponent<MatchTimerUI>();
@@ -117,6 +117,11 @@ public class SceneInitializer : MonoBehaviour
     
     // ✅ FIRST: Setup BehaviorParameters BEFORE agent scripts initialize
     SetupBehaviorParameters(agent, "KillerAgent", new int[] { 5, 5, 5 }, Constants.KILLER_OBS_SIZE);
+
+    if(agent == null)
+    {
+        Debug.Log("Ok that's real bad.");
+    }
 
     // THEN: Add action/movement scripts
     if (agent.GetComponent<EvilActionScript>() == null)

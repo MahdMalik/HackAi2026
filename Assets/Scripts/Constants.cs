@@ -3,8 +3,8 @@ using UnityEngine;
 public static class Constants
 {
     // Base movement speed in world units per second.
-    // Lowered a bit to make motion feel less "teleporty" on screen.
-    public static float speed = 3.0f;
+    // Keep this modest so agents don't cross the screen too quickly.
+    public static float speed = 1.5f;
 
     // Alignment strings
     public const string ALIGNMENT_NEUTRAL   = "Neutral";

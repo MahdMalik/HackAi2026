@@ -8,9 +8,10 @@ using Unity.MLAgents.Actuators;
 
 public class GameManager : MonoBehaviour
 {
-    public int matchTime = 30;
+    public int matchTime = 30;  // 30 seconds per match
     public float currentTime = 0;
     public int matchNumber = 0;
+    public bool matchStarted = false;
     
     [HideInInspector]
     public Dictionary<int, RobotScript> robots;
@@ -23,10 +24,6 @@ public class GameManager : MonoBehaviour
     {
         robots = new Dictionary<int, RobotScript>();
         pendingRewards = new Dictionary<int, float>();
-        
-        // Ensure the simulation runs at normal real‑time speed in the Editor.
-        // Training scripts can still override this via ML‑Agents if desired.
-        Time.timeScale = 1f;
     }
     
     public void InitializeRobots()
@@ -78,13 +75,8 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        #if UNITY_EDITOR
-        // In the Editor, force real‑time pacing so a "30 second" match
-        // actually lasts ~30 seconds for visualization, regardless of
-        // any ML‑Agents timeScale changes used during training.
-        Time.timeScale = 1f;
-        #endif
-        
+        if (!matchStarted) return;
+        // Advance match time using normal Unity game time.
         currentTime += Time.deltaTime;
         
         if(currentTime > matchTime && !matchEnded)
@@ -133,6 +125,7 @@ public class GameManager : MonoBehaviour
     {
         currentTime = 0f;
         matchEnded = false;
+        matchStarted = false; 
         matchNumber++;
         
         // Reset all robots
