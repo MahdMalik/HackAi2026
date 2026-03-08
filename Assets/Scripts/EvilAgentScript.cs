@@ -99,19 +99,19 @@ public class EvilAgentScript : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        // Debug.Log($"CollectObservations: robotScript={robotScript != null}, gm={gameManager != null}, robots={gameManager?.robots != null}");
         // ALWAYS add exactly 12 observations, no matter what
         int obsCount = 0;
         
+        // Ensure gameManager is set BEFORE try block to avoid zero vector errors
+        if (gameManager == null)
+        {
+            GameObject gmObj = GameObject.Find("GameManager");
+            if (gmObj != null)
+                gameManager = gmObj.GetComponent<GameManager>();
+        }
+        
         try
         {
-            // Ensure gameManager is set
-            if (gameManager == null)
-            {
-                GameObject gmObj = GameObject.Find("GameManager");
-                if (gmObj != null)
-                    gameManager = gmObj.GetComponent<GameManager>();
-            }
             
             if (gameManager != null && gameManager.robots != null)
             {
@@ -166,10 +166,10 @@ public class EvilAgentScript : Agent
                 
                 // 5. Alignment counts for self perception
                 Dictionary<string, int> alignmentCounts = robotScript.GetAlignmentCounts();
-                sensor.AddObservation(alignmentCounts[Constants.ALIGNMENT_NEUTRAL] / (float)gameManager.robots.Count);
-                sensor.AddObservation(alignmentCounts[Constants.ALIGNMENT_FRIENDLY] / (float)gameManager.robots.Count);
-                sensor.AddObservation(alignmentCounts[Constants.ALIGNMENT_PREY] / (float)gameManager.robots.Count);
-                sensor.AddObservation(alignmentCounts[Constants.ALIGNMENT_PREDATOR] / (float)gameManager.robots.Count);
+                sensor.AddObservation(alignmentCounts.ContainsKey(Constants.ALIGNMENT_NEUTRAL) ? alignmentCounts[Constants.ALIGNMENT_NEUTRAL] / (float)gameManager.robots.Count : 0f);
+                sensor.AddObservation(alignmentCounts.ContainsKey(Constants.ALIGNMENT_FRIENDLY) ? alignmentCounts[Constants.ALIGNMENT_FRIENDLY] / (float)gameManager.robots.Count : 0f);
+                sensor.AddObservation(alignmentCounts.ContainsKey(Constants.ALIGNMENT_PREY) ? alignmentCounts[Constants.ALIGNMENT_PREY] / (float)gameManager.robots.Count : 0f);
+                sensor.AddObservation(alignmentCounts.ContainsKey(Constants.ALIGNMENT_PREDATOR) ? alignmentCounts[Constants.ALIGNMENT_PREDATOR] / (float)gameManager.robots.Count : 0f);
                 obsCount += 4;
             }
         }

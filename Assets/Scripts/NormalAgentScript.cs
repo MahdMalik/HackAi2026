@@ -88,18 +88,19 @@ public class NormalAgentScript : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        // ALWAYS add exactly 16 observations, no matter what
+        // ALWAYS add exactly 12 observations, no matter what
         int obsCount = 0;
+        
+        // Ensure gameManager is set BEFORE try block to avoid zero vector errors
+        if (gameManager == null)
+        {
+            GameObject gmObj = GameObject.Find("GameManager");
+            if (gmObj != null)
+                gameManager = gmObj.GetComponent<GameManager>();
+        }
         
         try
         {
-            // Ensure gameManager is set
-            if (gameManager == null)
-            {
-                GameObject gmObj = GameObject.Find("GameManager");
-                if (gmObj != null)
-                    gameManager = gmObj.GetComponent<GameManager>();
-            }
             
             if (gameManager != null && gameManager.robots != null)
             {

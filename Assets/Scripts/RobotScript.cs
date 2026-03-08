@@ -146,21 +146,11 @@ public class RobotScript : MonoBehaviour
         // Get camera position
         Vector3 cameraPos = mainCamera.transform.position;
         
-        // Clamp position to screen bounds with padding
-        Vector3 unclampedPos = transform.position;
-        Vector3 clampedPos = unclampedPos;
+        // Clamp position to screen bounds with padding - clean clamp without aggressive nudging
+        Vector3 clampedPos = transform.position;
         clampedPos.x = Mathf.Clamp(clampedPos.x, cameraPos.x - screenBounds.x + boundsPadding, cameraPos.x + screenBounds.x - boundsPadding);
         clampedPos.y = Mathf.Clamp(clampedPos.y, cameraPos.y - screenBounds.y + boundsPadding, cameraPos.y + screenBounds.y - boundsPadding);
         clampedPos.z = 0; // Keep z at 0
-        
-        // If we had to clamp, gently nudge the agent back toward screen center
-        // so they don't visually "stick" in the exact corner.
-        if ((clampedPos - unclampedPos).sqrMagnitude > 1e-6f)
-        {
-            Vector3 center = cameraPos;
-            Vector3 inward = (center - clampedPos).normalized;
-            clampedPos += inward * 0.01f;
-        }
         
         transform.position = clampedPos;
     }
