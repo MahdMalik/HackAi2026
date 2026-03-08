@@ -5,7 +5,8 @@ public class NormalActionScript : RobotScript
 {
     void Start()
     {
-        foreach (int botId in manager.robots.Keys)
+        DoStart();
+        foreach (int botId in managerScript.robots.Keys)
         {
             if(botId != robotId) alignments[botId] = "Neutral";
         }
@@ -14,6 +15,6 @@ public class NormalActionScript : RobotScript
     // Update is called once per frame
     void Update()
     {
-        
+        DoUpdate();
     }
 }

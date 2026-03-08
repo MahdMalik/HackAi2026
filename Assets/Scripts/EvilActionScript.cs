@@ -6,7 +6,8 @@ public class EvilActionScript : RobotScript
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        foreach (int botId in manager.robots.Keys)
+        DoStart();
+        foreach (int botId in managerScript.robots.Keys)
         {
             if(botId != robotId) alignments[botId] = "Prey";
         }
@@ -15,7 +16,7 @@ public class EvilActionScript : RobotScript
     // Update is called once per frame
     void Update()
     {
-        
+        DoUpdate();
     }
 
 }

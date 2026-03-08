@@ -130,6 +130,8 @@ GameObject:
   - component: {fileID: 378604739}
   - component: {fileID: 378604741}
   - component: {fileID: 378604740}
+  - component: {fileID: 378604743}
+  - component: {fileID: 378604742}
   m_Layer: 0
   m_Name: NormalGuy1
   m_TagString: Untagged
@@ -242,6 +244,37 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &378604742
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 378604738}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0828719d22eb274c84ea1d8c2eab386, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NormalActionScript
+  manager: {fileID: 639576571}
+  currentAction: Move Random
+  robotId: 0
+--- !u!114 &378604743
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 378604738}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7259d205c78241b41bb0907f04963251, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NormalScript
+  agentParameters:
+    maxStep: 0
+  hasUpgradedFromAgentParameters: 1
+  MaxStep: 0
 --- !u!1 &441484901
 GameObject:
   m_ObjectHideFlags: 0
@@ -629,6 +662,8 @@ GameObject:
   - component: {fileID: 915460405}
   - component: {fileID: 915460407}
   - component: {fileID: 915460406}
+  - component: {fileID: 915460409}
+  - component: {fileID: 915460408}
   m_Layer: 0
   m_Name: EvilGuy1
   m_TagString: Untagged
@@ -741,6 +776,37 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &915460408
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 915460404}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18b47fc5fe288d14b9544947e3ac9a72, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EvilScript
+  agentParameters:
+    maxStep: 0
+  hasUpgradedFromAgentParameters: 1
+  MaxStep: 0
+--- !u!114 &915460409
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 915460404}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9d913bac0b4a024ca31c9a267d78986, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EvilActionScript
+  manager: {fileID: 639576571}
+  currentAction: Move Random
+  robotId: 0
 --- !u!1 &1110586865
 GameObject:
   m_ObjectHideFlags: 0
@@ -784,6 +850,8 @@ GameObject:
   - component: {fileID: 1163863078}
   - component: {fileID: 1163863080}
   - component: {fileID: 1163863079}
+  - component: {fileID: 1163863082}
+  - component: {fileID: 1163863081}
   m_Layer: 0
   m_Name: NormalGuy2
   m_TagString: Untagged
@@ -896,6 +964,37 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &1163863081
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1163863077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7259d205c78241b41bb0907f04963251, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NormalScript
+  agentParameters:
+    maxStep: 0
+  hasUpgradedFromAgentParameters: 1
+  MaxStep: 0
+--- !u!114 &1163863082
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1163863077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0828719d22eb274c84ea1d8c2eab386, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NormalActionScript
+  manager: {fileID: 639576571}
+  currentAction: Move Random
+  robotId: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -13,22 +13,24 @@ public class GameManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
-        GameObject evilBots = transform.parent.Find("EvilFellas").gameObject;
-        GameObject survivorBots = transform.parent.Find("NormalFellas").gameObject;
+        robots = new Dictionary<int, RobotScript>();
+        
+        GameObject evilBots = GameObject.Find("EvilFellas").gameObject;
+        GameObject survivorBots = GameObject.Find("NormalFellas").gameObject;
 
         int ids = 0;
-        foreach (GameObject evilBot in evilBots.transform)
+        foreach (Transform evilBot in evilBots.transform)
         {
-            EvilActionScript botScript = evilBot.GetComponent<EvilActionScript>();
+            EvilActionScript botScript = evilBot.gameObject.GetComponent<EvilActionScript>();
             robots[ids] = botScript;
             botScript.robotId = ids;
             ids += 1;
 
         }
 
-        foreach (GameObject survivorBot in survivorBots.transform)
+        foreach (Transform survivorBot in survivorBots.transform)
         {
-            NormalActionScript botScript = survivorBot.GetComponent<NormalActionScript>();
+            NormalActionScript botScript = survivorBot.gameObject.GetComponent<NormalActionScript>();
             robots[ids] = botScript;
             botScript.robotId = ids;
             ids += 1;
