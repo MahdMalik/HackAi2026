@@ -1,11 +1,14 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class NormalActionScript : RobotScript
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        foreach (int botId in manager.robots.Keys)
+        {
+            if(botId != robotId) alignments[botId] = "Neutral";
+        }
     }
 
     // Update is called once per frame
