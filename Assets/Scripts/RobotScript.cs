@@ -4,7 +4,6 @@ using UnityEngine;
 public class RobotScript : MonoBehaviour
 {
     public GameObject manager;
-    public float speed;
     protected GameManager managerScript;
     
     public string currentAction = "Move Random";
@@ -16,7 +15,6 @@ public class RobotScript : MonoBehaviour
     protected RobotScript closestBot = null;
 
     protected RobotScript secondClosestBot = null;
-
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     protected void DoStart()
@@ -31,8 +29,8 @@ public class RobotScript : MonoBehaviour
         switch (currentAction)
         {
             case "Move Random":
-                float randomXVel = Random.Range(-speed, speed) * Time.deltaTime;
-                float randomYVel = Random.Range(-speed, speed) * Time.deltaTime;
+                float randomXVel = Random.Range(-Constants.speed, Constants.speed) * Time.deltaTime;
+                float randomYVel = Random.Range(-Constants.speed, Constants.speed) * Time.deltaTime;
                 transform.position += new Vector3(randomXVel, randomYVel, 0);
                 break;
         }
