@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -22,11 +23,12 @@ public class GameManager : MonoBehaviour
 
     public GameObject survivorPrefab;
 
-    public List<GameObject> players;
+    public Dictionary<int, GameObject> players;
 
     void Start()
     {
         UI.gameStartSignal += StartGame;
+        players = new Dictionary<int, GameObject>();
     }
 
     Vector2 CreateNewPosition()
@@ -34,7 +36,7 @@ public class GameManager : MonoBehaviour
         float xPos = UnityEngine.Random.Range(mapBoundsX.x, mapBoundsX.y);
         float yPos = UnityEngine.Random.Range(mapBoundsY.x, mapBoundsY.y);
 
-        foreach (GameObject plr in players)
+        foreach (GameObject plr in players.Values)
         {
             float xDist = Mathf.Abs(xPos - plr.transform.position.x);
             float yDist = Mathf.Abs(yPos - plr.transform.position.y);
@@ -55,7 +57,8 @@ public class GameManager : MonoBehaviour
         {
             GameObject newSurvivor = Instantiate(survivorPrefab);
             newSurvivor.transform.position = CreateNewPosition();
-            players.Add(newSurvivor);
+            newSurvivor.GetComponent<Player>().id = i;
+            players[newSurvivor.GetComponent<Player>().id] = newSurvivor;
         }
     }
 
@@ -72,10 +75,11 @@ public class GameManager : MonoBehaviour
     {
         gameStarted = false;
         gameEndSignal.Invoke("Time Up!");
-        foreach(GameObject plr in players)
+        foreach(GameObject plr in players.Values)
         {
             Destroy(plr);
         }
+        players.Clear();
     }
 
     // Update is called once per frame
