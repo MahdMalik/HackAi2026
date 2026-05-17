@@ -1141,6 +1141,8 @@ MonoBehaviour:
   timeRemaining: 60
   numKillers: 0
   numSurvivors: 0
+  survivorPrefab: {fileID: 3390594625733851918, guid: 5ffef45782160b147accfb3b0f9c4b28, type: 3}
+  players: []
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
