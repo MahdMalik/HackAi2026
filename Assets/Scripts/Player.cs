@@ -5,16 +5,39 @@ using System.Linq;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
+using Unity.Mathematics;
+
+public enum PlayerRoles
+{
+    Civillian,
+    Killer,
+    Hero
+} 
+
+public enum PlayerActions
+{
+    FollowTrustedPlayer,
+    MoveRandomly,
+    FleeFromDanger,
+    UseMeatshield,
+    InvestigatePlayer,
+    ChargeAway
+}
 
 public class Player : Agent
 {
+    public readonly (int min, int max) nextActionRange = (1, 4);
+    
     public int id;
-
-    public Queue<int> lastTwoActions;
+    public Dictionary<int, float[]> playerStatuses;
+    private float timeUntilNextAction;
+    private PlayerActions currentAction;
 
     public override void OnEpisodeBegin()
     {
-        lastTwoActions = new Queue<int>();
+        playerStatuses = new Dictionary<int, float[]>();
+        timeUntilNextAction = UnityEngine.Random.Range(nextActionRange.min, nextActionRange.max);
+        currentAction = PlayerActions.MoveRandomly;
     }
 
 
@@ -24,13 +47,25 @@ public class Player : Agent
     }
 
 
-    void Start()
+    protected override void Awake()
     {
+        base.Awake();
         OnEpisodeBegin();
+    }
+
+    public override void OnActionReceived(ActionBuffers actions)
+    {
+        
     }
 
     void Update()
     {
-        
+        timeUntilNextAction -= Time.deltaTime;
+        if(timeUntilNextAction < 0)
+        {
+            timeUntilNextAction = UnityEngine.Random.Range(nextActionRange.min, nextActionRange.max);
+            RequestDecision();
+
+        }
     }
 }

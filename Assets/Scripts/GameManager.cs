@@ -51,6 +51,16 @@ public class GameManager : MonoBehaviour
         return new Vector2(xPos, yPos);
     }
 
+    float[] GenerateProbabilities()
+    {
+        float firstProbLogit = UnityEngine.Random.Range(0f, 1f);
+        float secondProbLogit = UnityEngine.Random.Range(0f, 1f);
+        float thirdProbLogit = UnityEngine.Random.Range(0f, 1f);
+
+        float dividingFactor = firstProbLogit + secondProbLogit + thirdProbLogit;
+        return new float[] { firstProbLogit / dividingFactor, secondProbLogit / dividingFactor, thirdProbLogit / dividingFactor };
+    }
+
     void SetupPlayers()
     {
         for(int i = 0; i < totalSurvivors; i++)
@@ -60,7 +70,23 @@ public class GameManager : MonoBehaviour
             newSurvivor.GetComponent<Player>().id = i;
             players[newSurvivor.GetComponent<Player>().id] = newSurvivor;
         }
+
+
+        foreach(int plrId in players.Keys)
+        {
+            Player plrScript = players[plrId].GetComponent<Player>();
+            foreach(int otherPlrId in players.Keys)
+            {
+                if(plrId == otherPlrId)
+                {
+                    continue;
+                }
+                plrScript.playerStatuses[otherPlrId] = GenerateProbabilities();
+            }
+        }
     }
+
+
 
     void StartGame()
     {
