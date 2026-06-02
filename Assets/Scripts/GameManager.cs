@@ -61,6 +61,11 @@ public class GameManager : MonoBehaviour
         return new float[] { firstProbLogit / dividingFactor, secondProbLogit / dividingFactor, thirdProbLogit / dividingFactor };
     }
 
+    PlayerRoles GetRandomRole()
+    {
+        return (PlayerRoles) UnityEngine.Random.Range(0, Enum.GetNames(typeof(PlayerRoles)).Length);
+    }
+
     void SetupPlayers()
     {
         for(int i = 0; i < totalSurvivors; i++)
@@ -69,6 +74,8 @@ public class GameManager : MonoBehaviour
             newSurvivor.transform.position = CreateNewPosition();
             newSurvivor.GetComponent<Player>().id = i;
             players[newSurvivor.GetComponent<Player>().id] = newSurvivor;
+            newSurvivor.GetComponent<Player>().SetRole(GetRandomRole());
+
         }
 
 

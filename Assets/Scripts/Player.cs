@@ -14,6 +14,7 @@ public enum PlayerRoles
     Hero
 } 
 
+
 public enum PlayerActions
 {
     FollowTrustedPlayer,
@@ -32,6 +33,8 @@ public class Player : Agent
     public Dictionary<int, float[]> playerStatuses;
     private float timeUntilNextAction;
     private PlayerActions currentAction;
+
+    private PlayerRoles currentRole;
 
     public override void OnEpisodeBegin()
     {
@@ -53,6 +56,11 @@ public class Player : Agent
         OnEpisodeBegin();
     }
 
+    public void SetRole(PlayerRoles theRole)
+    {
+        currentRole = theRole;
+    }
+
     public override void OnActionReceived(ActionBuffers actions)
     {
         
@@ -64,8 +72,8 @@ public class Player : Agent
         if(timeUntilNextAction < 0)
         {
             timeUntilNextAction = UnityEngine.Random.Range(nextActionRange.min, nextActionRange.max);
-            RequestDecision();
-
+            // RequestDecision();
+            currentAction = (PlayerActions) UnityEngine.Random.Range(0, Enum.GetNames(typeof(PlayerActions)).Length);
         }
     }
 }
