@@ -36,6 +36,13 @@ public class Player : Agent
 
     private PlayerRoles currentRole;
     private Vector2 currentTargetWaypoint;
+    public GameManager managerBud;
+
+    public const int CLOSEST_PLAYERS_CHECKED = 3;
+    public (int, GameObject)[] nClosetsPlayers;
+    public GameObject friendliestPlayer;
+
+
 
     public override void OnEpisodeBegin()
     {
@@ -43,6 +50,7 @@ public class Player : Agent
         timeUntilNextAction = UnityEngine.Random.Range(nextActionRange.min, nextActionRange.max);
         currentAction = PlayerActions.MoveRandomly;
         currentTargetWaypoint = new Vector2(transform.position.x, transform.position.y);
+        nClosetsPlayers = new (int, GameObject)[CLOSEST_PLAYERS_CHECKED];
     }
 
 
@@ -67,6 +75,50 @@ public class Player : Agent
     {
         
     }
+
+    // will do later, not much of a point doing it right now
+    private void SetNClosestPlayers()
+    {
+        nClosetsPlayers = new (int, GameObject)[CLOSEST_PLAYERS_CHECKED];
+
+        foreach(int plrId in playerStatuses.Keys)
+        {
+            if(plrId == id)
+            {
+                continue;
+            }
+            GameObject plrObj = managerBud.getPlayerObjFromId(plrId);
+            string loopingStatus = "Placing";
+
+            (int, GameObject) tempObj = (-1, null);
+            for(int i = 0; i < nClosetsPlayers.Length; i++)
+            {
+                (int, GameObject) arrayObj = nClosetsPlayers[i];
+                if(loopingStatus == "Placing")
+                {
+                    if(arrayObj.Item2 == null)
+                    {
+                        nClosetsPlayers[i] = (plrId, plrObj);
+                        break;
+                    }
+                    if((transform.position - plrObj.transform.position).sqrMagnitude < (transform.position - arrayObj.Item2.transform.position).sqrMagnitude)
+                    {
+                        loopingStatus = "Propagating";
+                        tempObj = arrayObj;
+                        nClosetsPlayers[i] = (plrId, plrObj);
+                    }
+                }
+                else
+                {
+                    (int, GameObject) tempTempObj = tempObj;
+                    tempObj = arrayObj;
+                    nClosetsPlayers[i] = tempTempObj;
+                }
+            }
+        }
+    }
+
+    
 
     void Update()
     {

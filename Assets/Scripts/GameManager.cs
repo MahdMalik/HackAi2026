@@ -72,9 +72,11 @@ public class GameManager : MonoBehaviour
         {
             GameObject newSurvivor = Instantiate(survivorPrefab);
             newSurvivor.transform.position = CreateNewPosition();
-            newSurvivor.GetComponent<Player>().id = i;
-            players[newSurvivor.GetComponent<Player>().id] = newSurvivor;
-            newSurvivor.GetComponent<Player>().SetRole(GetRandomRole());
+            Player survivorScript = newSurvivor.GetComponent<Player>();
+            survivorScript.id = i;
+            players[survivorScript.id] = newSurvivor;
+            survivorScript.SetRole(GetRandomRole());
+            survivorScript.managerBud = this;
         }
 
 
@@ -125,5 +127,10 @@ public class GameManager : MonoBehaviour
                 EndGame();
             }
         }
+    }
+
+    public GameObject getPlayerObjFromId(int id)
+    {
+        return players[id];
     }
 }
