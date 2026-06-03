@@ -75,7 +75,6 @@ public class GameManager : MonoBehaviour
             newSurvivor.GetComponent<Player>().id = i;
             players[newSurvivor.GetComponent<Player>().id] = newSurvivor;
             newSurvivor.GetComponent<Player>().SetRole(GetRandomRole());
-
         }
 
 

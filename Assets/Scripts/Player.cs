@@ -35,12 +35,14 @@ public class Player : Agent
     private PlayerActions currentAction;
 
     private PlayerRoles currentRole;
+    private Vector2 currentTargetWaypoint;
 
     public override void OnEpisodeBegin()
     {
         playerStatuses = new Dictionary<int, float[]>();
         timeUntilNextAction = UnityEngine.Random.Range(nextActionRange.min, nextActionRange.max);
         currentAction = PlayerActions.MoveRandomly;
+        currentTargetWaypoint = new Vector2(transform.position.x, transform.position.y);
     }
 
 
@@ -74,6 +76,13 @@ public class Player : Agent
             timeUntilNextAction = UnityEngine.Random.Range(nextActionRange.min, nextActionRange.max);
             // RequestDecision();
             currentAction = (PlayerActions) UnityEngine.Random.Range(0, Enum.GetNames(typeof(PlayerActions)).Length);
+        }
+        switch(currentAction)
+        {
+            case PlayerActions.FollowTrustedPlayer:
+                break;
+            default:
+                break;
         }
     }
 }
