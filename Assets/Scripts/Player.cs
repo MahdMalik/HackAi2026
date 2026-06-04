@@ -6,6 +6,7 @@ using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
 using Unity.Mathematics;
+using UnityEngine.Analytics;
 
 public enum PlayerRoles
 {
@@ -28,6 +29,9 @@ public enum PlayerActions
 public class Player : Agent
 {
     public readonly (int min, int max) nextActionRange = (1, 4);
+    public const int playerSpeed = 4;
+    public const int distanceForRandomMovement = 3;
+    public const float dangerThreshold = 0.45f;
     
     public int id;
     public Dictionary<int, float[]> playerStatuses;
@@ -41,9 +45,9 @@ public class Player : Agent
     public const int CLOSEST_PLAYERS_CHECKED = 3;
     public (int, GameObject)[] nClosestPlayers;
     public GameObject friendliestPlayer;
-    public GameObject hostilestPlayer;
+    public List<GameObject> hostilestPlayers;
     public GameObject unsurestPlayer;
-
+    private bool actionJustChanged;
 
 
     public override void OnEpisodeBegin()
@@ -52,8 +56,10 @@ public class Player : Agent
         timeUntilNextAction = UnityEngine.Random.Range(nextActionRange.min, nextActionRange.max);
         currentAction = PlayerActions.MoveRandomly;
         currentTargetWaypoint = new Vector2(transform.position.x, transform.position.y);
+        actionJustChanged = false;
         nClosestPlayers = new (int, GameObject)[CLOSEST_PLAYERS_CHECKED];
-        SetnClosestPlayers();
+        SetNClosestPlayers();
+        hostilestPlayers = new List<GameObject>();
     }
 
 
@@ -80,7 +86,7 @@ public class Player : Agent
     }
 
     // will do later, not much of a point doing it right now
-    private void SetnClosestPlayers()
+    private void SetNClosestPlayers()
     {
         nClosestPlayers = new (int, GameObject)[CLOSEST_PLAYERS_CHECKED];
 
@@ -121,7 +127,7 @@ public class Player : Agent
         }
     }
 
-    private void ReturnFriendliestPlayer()
+    private void SetFriendliestPlayer()
     {
         float maxFriendlyProb = -1;
         foreach((int, GameObject) player in nClosestPlayers)
@@ -139,18 +145,17 @@ public class Player : Agent
     }
 
     // dangerousest!
-    private void ReturnDangerousestPlayer()
+    private void SetDangerousestPlayers()
     {
-        float maxHostileProb = -1;
+        hostilestPlayers = new List<GameObject>();
         foreach((int, GameObject) player in nClosestPlayers)
         {
             if(currentRole == PlayerRoles.Civillian || currentRole == PlayerRoles.Hero)
             {
                 float hostileProb = playerStatuses[player.Item1][(int) PlayerRoles.Killer];
-                if(hostileProb > maxHostileProb)
+                if(hostileProb > dangerThreshold)
                 {
-                    hostilestPlayer = player.Item2;
-                    maxHostileProb = hostileProb;
+                    hostilestPlayers.Add(player.Item2);
                 }
             }
         }
@@ -166,7 +171,7 @@ public class Player : Agent
         return entropy;
     }
 
-    void ReturnMostUnknownPlayer()
+    void SetMostUnknownPlayer()
     {
         float maxEntropy = -1;
         foreach((int, GameObject) player in nClosestPlayers)
@@ -187,14 +192,54 @@ public class Player : Agent
         {
             timeUntilNextAction = UnityEngine.Random.Range(nextActionRange.min, nextActionRange.max);
             // RequestDecision();
+
+            SetNClosestPlayers();
+            SetFriendliestPlayer();
+            SetDangerousestPlayers();
+            SetMostUnknownPlayer();
+
             currentAction = (PlayerActions) UnityEngine.Random.Range(0, Enum.GetNames(typeof(PlayerActions)).Length);
+            actionJustChanged = true;
         }
+        
         switch(currentAction)
         {
             case PlayerActions.FollowTrustedPlayer:
+                currentTargetWaypoint = friendliestPlayer.transform.position;
+                break;
+            case PlayerActions.MoveRandomly:
+                if(Vector2.Distance(transform.position, currentTargetWaypoint) < 0.01f || actionJustChanged)
+                {
+                    float directionAngle = UnityEngine.Random.Range(0f, 360f);
+                    Vector2 addedVector = new Vector2(Mathf.Cos(directionAngle * Mathf.Deg2Rad) * distanceForRandomMovement, Mathf.Cos(directionAngle * Mathf.Deg2Rad)  * distanceForRandomMovement);
+                    currentTargetWaypoint = (Vector2) transform.position + addedVector;
+                }
+                break;
+            case PlayerActions.FleeFromDanger:
+                if(actionJustChanged)
+                {
+                    SetDangerousestPlayers();
+                    if(hostilestPlayers.Count == 0)
+                    {
+                        currentAction = PlayerActions.MoveRandomly;
+                        return;
+                    }
+                }
+                Vector2 directionToRun = new Vector2();
+                if(hostilestPlayers.Count == 1)
+                {
+                    directionToRun = transform.position - hostilestPlayers[0].transform.position;
+                }
+                else if(hostilestPlayers.Count == 2)
+                {
+                    // directionToRun = 
+                }
+
                 break;
             default:
                 break;
         }
+        transform.position = Vector2.MoveTowards(transform.position, currentTargetWaypoint, playerSpeed * Time.deltaTime);
+        actionJustChanged = false;
     }
 }
