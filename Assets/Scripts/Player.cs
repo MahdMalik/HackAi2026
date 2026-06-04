@@ -39,8 +39,10 @@ public class Player : Agent
     public GameManager managerBud;
 
     public const int CLOSEST_PLAYERS_CHECKED = 3;
-    public (int, GameObject)[] nClosetsPlayers;
+    public (int, GameObject)[] nClosestPlayers;
     public GameObject friendliestPlayer;
+    public GameObject hostilestPlayer;
+    public GameObject unsurestPlayer;
 
 
 
@@ -50,7 +52,8 @@ public class Player : Agent
         timeUntilNextAction = UnityEngine.Random.Range(nextActionRange.min, nextActionRange.max);
         currentAction = PlayerActions.MoveRandomly;
         currentTargetWaypoint = new Vector2(transform.position.x, transform.position.y);
-        nClosetsPlayers = new (int, GameObject)[CLOSEST_PLAYERS_CHECKED];
+        nClosestPlayers = new (int, GameObject)[CLOSEST_PLAYERS_CHECKED];
+        SetnClosestPlayers();
     }
 
 
@@ -77,9 +80,9 @@ public class Player : Agent
     }
 
     // will do later, not much of a point doing it right now
-    private void SetNClosestPlayers()
+    private void SetnClosestPlayers()
     {
-        nClosetsPlayers = new (int, GameObject)[CLOSEST_PLAYERS_CHECKED];
+        nClosestPlayers = new (int, GameObject)[CLOSEST_PLAYERS_CHECKED];
 
         foreach(int plrId in playerStatuses.Keys)
         {
@@ -91,34 +94,91 @@ public class Player : Agent
             string loopingStatus = "Placing";
 
             (int, GameObject) tempObj = (-1, null);
-            for(int i = 0; i < nClosetsPlayers.Length; i++)
+            for(int i = 0; i < nClosestPlayers.Length; i++)
             {
-                (int, GameObject) arrayObj = nClosetsPlayers[i];
+                (int, GameObject) arrayObj = nClosestPlayers[i];
                 if(loopingStatus == "Placing")
                 {
                     if(arrayObj.Item2 == null)
                     {
-                        nClosetsPlayers[i] = (plrId, plrObj);
+                        nClosestPlayers[i] = (plrId, plrObj);
                         break;
                     }
                     if((transform.position - plrObj.transform.position).sqrMagnitude < (transform.position - arrayObj.Item2.transform.position).sqrMagnitude)
                     {
                         loopingStatus = "Propagating";
                         tempObj = arrayObj;
-                        nClosetsPlayers[i] = (plrId, plrObj);
+                        nClosestPlayers[i] = (plrId, plrObj);
                     }
                 }
                 else
                 {
                     (int, GameObject) tempTempObj = tempObj;
                     tempObj = arrayObj;
-                    nClosetsPlayers[i] = tempTempObj;
+                    nClosestPlayers[i] = tempTempObj;
                 }
             }
         }
     }
 
-    
+    private void ReturnFriendliestPlayer()
+    {
+        float maxFriendlyProb = -1;
+        foreach((int, GameObject) player in nClosestPlayers)
+        {
+            if(currentRole == PlayerRoles.Civillian || currentRole == PlayerRoles.Hero)
+            {
+                float friendlyProb = playerStatuses[player.Item1][(int) PlayerRoles.Civillian] + playerStatuses[player.Item1][(int) PlayerRoles.Hero];
+                if(friendlyProb > maxFriendlyProb)
+                {
+                    friendliestPlayer = player.Item2;
+                    maxFriendlyProb = friendlyProb;
+                }
+            }
+        }
+    }
+
+    // dangerousest!
+    private void ReturnDangerousestPlayer()
+    {
+        float maxHostileProb = -1;
+        foreach((int, GameObject) player in nClosestPlayers)
+        {
+            if(currentRole == PlayerRoles.Civillian || currentRole == PlayerRoles.Hero)
+            {
+                float hostileProb = playerStatuses[player.Item1][(int) PlayerRoles.Killer];
+                if(hostileProb > maxHostileProb)
+                {
+                    hostilestPlayer = player.Item2;
+                    maxHostileProb = hostileProb;
+                }
+            }
+        }
+    }
+
+    float CalculateEntropy(float[] probabilities)
+    {
+        float entropy = 0;
+        for(int i = 0; i < probabilities.Length; i++)
+        {
+            entropy -= probabilities[i] * math.log2(probabilities[i]);
+        }
+        return entropy;
+    }
+
+    void ReturnMostUnknownPlayer()
+    {
+        float maxEntropy = -1;
+        foreach((int, GameObject) player in nClosestPlayers)
+        {
+            float entropy = CalculateEntropy(playerStatuses[player.Item1]);
+            if(entropy > maxEntropy)
+            {
+                unsurestPlayer = player.Item2;
+                maxEntropy = entropy;
+            }
+        }
+    }
 
     void Update()
     {
